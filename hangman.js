@@ -1,10 +1,21 @@
 
-
-
-const Hangman = function (word, attempts) {
+ const Hangman = function (word, attemptsLeft) {
     this.word = word.toLowerCase().split('')
-    this.attempts = attempts
+    this.attemptsLeft = attemptsLeft
     this.guessedLetters = []
+    this.status = 'playing'
+}
+
+Hangman.prototype.calculateStatus = function () {
+    const finished = this.word.every((letter) => this.guessedLetters.includes(letter))
+
+    if (this.attemptsLeft === 0) {
+        this.status = 'failed'
+    } else if (finished) {
+        this.status = 'finished'
+    } else {
+        this.status = 'playing'
+    }
 }
 
 Hangman.prototype.getPuzzle = function() {
@@ -21,30 +32,36 @@ Hangman.prototype.getPuzzle = function() {
     return puzzle
 }
 
+
+Hangman.prototype.getStatusMessage = function () {
+    if (this.status === 'playing') {
+        return `Guesses left: ${this.attemptsLeft}`
+    } else if (this.status === 'failed') {
+        return `Nice try! The word was "${this.word.join('')}"`
+    } else {
+        return 'Great work! You guessed the work!'
+    }
+}
+
+
 Hangman.prototype.makeGuess = function(guess) {
     guess = guess.toLowerCase()
     const isUnique = !this.guessedLetters.includes(guess) // checks if letter already guessed
     const isBadGuess = !this.word.includes(guess)   // checks if guess is right
+
+    if (this.status !== 'playing') { // disable new guesses unless "playing"
+        return
+    }
 
     if (isUnique) {  // add correct guessed letter to guessedLetter array
         this.guessedLetters.push(guess)
     } 
 
     if (isUnique && isBadGuess) { // subtract 1 from attempt when guess is wrong
-        this.attempts--
+        this.attemptsLeft--
     }
+    this.calculateStatus()
 }
 
-const game1 = new Hangman('Cat', 2)
-game1.makeGuess('c')
-game1.makeGuess('t')
-game1.makeGuess('z')
-console.log(game1.getPuzzle())
-console.log(game1.attempts)
-
-
-const game2 = new Hangman('New Jersey', 4)
-game2.makeGuess('w')
-console.log(game2.getPuzzle())
 
 
